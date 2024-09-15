@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelly's Task</title>
+    <!-- Include Google Fonts -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nerko+One&display=swap">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #F1E1E0;
+            color: #333;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .header {
+            font-family: "Nerko One", cursive;
+            font-weight: 400;
+            font-style: normal;
+            color: #CA6C6F;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .planner-container {
+            background-color: #C1B6C2;
+            padding: 30px;
+            border-radius: 10px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .task-form {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .task-form input[type="text"] {
+            padding: 10px;
+            width: 70%;
+            border-radius: 5px;
+            border: 1px solid #9C949C;
+        }
+
+        .task-form button {
+            padding: 10px;
+            background-color: #CA6C6F;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .task-form button:hover {
+            background-color: #CC999E;
+        }
+
+        .task-list {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .task {
+            background-color: #F1E1E0;
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .task button {
+            background-color: #CA6C6F;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .task button:hover {
+            background-color: #CC999E;
+        }
+
+        .task input[type="checkbox"] {
+            margin-right: 10px;
+        }
+
+        /* Progress Bar Styles */
+        .progress-container {
+            margin-bottom: 20px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            background-color: #9C949C;
+            border-radius: 10px;
+            overflow: hidden;
+            height: 25px;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background-color: #CA6C6F;
+            text-align: center;
+            color: white;
+            line-height: 25px;
+            width: 0%;
+        }
+
+        /* Responsive Design */
+        @media screen and (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .planner-container {
+                padding: 20px;
+            }
+
+            .task-form {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .task-form input[type="text"] {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+
+            .task-form button {
+                width: 100%;
+            }
+        }
+
+        @media screen and (max-width: 480px) {
+            .planner-container {
+                padding: 15px;
+            }
+
+            .task {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .task button {
+                margin-top: 10px;
+                align-self: flex-end;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1 class="header">Kelly's Task to Complete</h1>
+
+    <div class="planner-container">
+        <!-- Progress Tracker -->
+        <div class="progress-container">
+            <div class="progress-bar">
+                <div class="progress-bar-fill" id="progressBar">0%</div>
+            </div>
+        </div>
+
+        <!-- Task input form -->
+        <div class="task-form">
+            <input type="text" id="taskInput" placeholder="Enter your task...">
+            <button onclick="addTask()">Add Task</button>
+        </div>
+
+        <!-- Task list -->
+        <ul id="taskList" class="task-list"></ul>
+    </div>
+
+    <script>
+        let totalTasks = 0;
+        let completedTasks = 0;
+
+        // Load saved tasks from localStorage when the page loads
+        window.onload = function() {
+            try {
+                const savedTasks = JSON.parse(localStorage.getItem('tasks')) || [];
+                savedTasks.forEach(task => {
+                    createTaskElement(task.text, task.completed);
+                });
+                updateProgress();
+            } catch (error) {
+                console.error('Failed to load tasks from localStorage:', error);
+            }
+        }
+
+        // Function to add a new task to the list
+        function addTask() {
+            const taskInput = document.getElementById('taskInput');
+            const taskText = taskInput.value.trim(); // Trim whitespace
+
+            // Check if input is empty
+            if (taskText === "") {
+                alert("Please enter a task!");
+                return;
+            }
+
+            // Create task element and add to the list
+            createTaskElement(taskText, false);
+            saveTasksToLocalStorage();
+
+            // Update task count and progress bar
+            taskInput.value = "";
+            updateProgress();
+        }
+
+        // Function to create a task element in the DOM
+        function createTaskElement(taskText, isCompleted) {
+            const li = document.createElement('li');
+            li.className = 'task';
+
+            // Create checkbox for task completion
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.checked = isCompleted;
+            checkbox.onclick = function() {
+                updateProgress();
+                saveTasksToLocalStorage();
+            };
+
+            // Create task text and remove button
+            li.innerHTML = `<span>${taskText}</span> <button onclick="removeTask(this)">Remove</button>`;
+            li.prepend(checkbox);
+
+            // Append the new task to the task list
+            document.getElementById('taskList').appendChild(li);
+
+            // Update the total number of tasks
+            totalTasks++;
+            if (isCompleted) {
+                completedTasks++;
+            }
+        }
+
+        // Function to remove a task from the list
+        function removeTask(taskElement) {
+            const li = taskElement.parentElement;
+            const checkbox = li.querySelector('input[type="checkbox"]');
+            if (checkbox.checked) {
+                completedTasks--;
+            }
+            li.remove();
+            totalTasks--;
+            saveTasksToLocalStorage();
+            updateProgress();
+        }
+
+        // Function to update the progress bar
+        function updateProgress() {
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            completedTasks = 0;
+
+            checkboxes.forEach(checkbox => {
+                if (checkbox.checked) {
+                    completedTasks++;
+                }
+            });
+
+            const progressPercentage = totalTasks === 0 ? 0 : (completedTasks / totalTasks) * 100;
+            const progressBar = document.getElementById('progressBar');
+            progressBar.style.width = `${progressPercentage}%`;
+            progressBar.innerText = `${Math.round(progressPercentage)}%`;
+        }
+
+        // Function to save tasks to localStorage
+        function saveTasksToLocalStorage() {
+            try {
+                const tasks = [];
+                const taskElements = document.querySelectorAll('.task');
+                taskElements.forEach(taskElement => {
+                   
