@@ -4,9 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kelly's Task</title>
-    <!-- Include Google Fonts -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nerko+One&display=swap">
+    <title>Kelly's Life</title>
     <style>
         * {
             margin: 0;
@@ -24,12 +22,9 @@
             align-items: center;
         }
 
-        .header {
-            font-family: "Nerko One", cursive;
-            font-weight: 400;
-            font-style: normal;
-            color: #CA6C6F;
+        h1 {
             margin-bottom: 20px;
+            color: #CA6C6F;
             text-align: center;
         }
 
@@ -167,7 +162,7 @@
 
 <body>
 
-    <h1 class="header">Kelly's Task to Complete</h1>
+    <h1>Tasks to Complete</h1>
 
     <div class="planner-container">
         <!-- Progress Tracker -->
@@ -288,4 +283,17 @@
                 const tasks = [];
                 const taskElements = document.querySelectorAll('.task');
                 taskElements.forEach(taskElement => {
-                   
+                    const text = taskElement.querySelector('span').innerText;
+                    const completed = taskElement.querySelector('input[type="checkbox"]').checked;
+                    tasks.push({ text, completed });
+                });
+                localStorage.setItem('tasks', JSON.stringify(tasks));
+            } catch (error) {
+                console.error('Failed to save tasks to localStorage:', error);
+            }
+        }
+    </script>
+
+</body>
+
+</html>
